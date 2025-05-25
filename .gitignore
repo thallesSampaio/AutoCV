@@ -1,0 +1,60 @@
+## Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+*.log
+
+## Visual Studio
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Rider
+.idea/
+
+## OS generated files
+.DS_Store
+Thumbs.db
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+## Dotnet CLI
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## ASP.NET (caso use em algum ponto)
+wwwroot/
+
+## Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+## Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+## Other
+*.swp
+*.bak
+*.tmp
+*.tmp.*
+*.old
+
+## Global JetBrains IDE settings
+.idea/
+
+## Local configuration files
+appsettings.*.json
+secrets.json
+
+## Optional: ignore migrations (caso use EF Core e queira ignorar)
+# Migrations/
