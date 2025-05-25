@@ -9,10 +9,12 @@ namespace AutoCV
     {
         private readonly ILogger<Worker> _logger;
         private readonly DataScraperService _scraper;
-        public Worker(ILogger<Worker> logger, DataScraperService scraper)
+        private readonly ExtractZipService _extractZip;
+        public Worker(ILogger<Worker> logger, DataScraperService scraper, ExtractZipService extractZip)
         {
             _logger = logger;
             _scraper = scraper;
+            _extractZip = extractZip;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -24,6 +26,7 @@ namespace AutoCV
                     _logger.LogInformation("Worker rodando às: {time}", DateTimeOffset.Now);
 
                         await _scraper.DownloadFilesAsync(stoppingToken);
+                        await _extractZip.ExtractFiles();
                 }
 
                 await Task.Delay(2000, stoppingToken);

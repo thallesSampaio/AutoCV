@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AutoCV")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+47ca1d6682b0f07c651edf7aa9f7d8d34f0cf316")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d7e0a4c5d0d8305af3dfca68f465c16109f3ae76")]
 [assembly: System.Reflection.AssemblyProductAttribute("AutoCV")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AutoCV")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
