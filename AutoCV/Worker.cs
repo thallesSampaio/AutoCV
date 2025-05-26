@@ -6,8 +6,8 @@ namespace AutoCV
     {
         private readonly ILogger<Worker> _logger;
         private readonly DataScraperService _scraper;
-        private readonly ExtractZipService _extractZip;
-        public Worker(ILogger<Worker> logger, DataScraperService scraper, ExtractZipService extractZip)
+        private readonly ZipService _extractZip;
+        public Worker(ILogger<Worker> logger, DataScraperService scraper, ZipService extractZip)
         {
             _logger = logger;
             _scraper = scraper;
