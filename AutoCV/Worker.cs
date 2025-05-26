@@ -1,7 +1,4 @@
-using System.Diagnostics;
-using System.Net;
 using AutoCV.Services;
-using HtmlAgilityPack;
 
 namespace AutoCV
 {
@@ -26,7 +23,7 @@ namespace AutoCV
                     _logger.LogInformation("Worker rodando às: {time}", DateTimeOffset.Now);
 
                         await _scraper.DownloadFilesAsync(stoppingToken);
-                        await _extractZip.ExtractFiles();
+                        await _extractZip.ExtractAndDeleteFiles();
                 }
 
                 await Task.Delay(2000, stoppingToken);

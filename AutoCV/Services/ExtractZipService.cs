@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 
 namespace AutoCV.Services
 {
@@ -25,11 +24,11 @@ namespace AutoCV.Services
                 //to do - logs
                 Console.WriteLine($"Extracting: {fileName}...");
 
-                ZipFile.ExtractToDirectory(zipPath, _sourceDirectory, overwriteFiles: true);
-
+                ZipFile.ExtractToDirectory(zipPath, Path.Combine(_sourceDirectory, fileName), overwriteFiles: true);
+                File.Delete(zipPath);
                 Console.WriteLine($"File extracted in: {_sourceDirectory}");
             }
-        }
+        } 
 
         // to do - remove folder after extract files
         // to do - maybe insert the data after extracting and delete the folder,
