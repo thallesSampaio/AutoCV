@@ -15,33 +15,34 @@ namespace AutoCV.Services
         }
 
 
-        public async Task ExtractAndDeleteFiles()
+        public Task ProcessZipFilesAsync(CancellationToken cancellationToken)
         {
             string[] zipFiles = Directory.GetFiles(_sourceDirectory, "*.zip");
-            
+
+            if (zipFiles.Length == 0)
+            {
+                _logger.LogInformation("No zip files found to process.");
+                return Task.FromCanceled(cancellationToken);
+            }
             foreach (string zipPath in zipFiles)
             {
                 string fileName = Path.GetFileNameWithoutExtension(zipPath);
 
-                //to do - logs
                 _logger.LogInformation($"Extracting: {fileName}...");
-
                 ZipFile.ExtractToDirectory(zipPath, Path.Combine(_sourceDirectory, fileName), overwriteFiles: true);
                 _logger.LogInformation($"File extracted in: {_sourceDirectory}");
                 File.Delete(zipPath);
                 _logger.LogInformation($"Zip file deleted: {zipPath}");
             }
+            return Task.CompletedTask;
         }
+
+        //to do - in future, after a csv get extracted start to insert when exctracting the other, no wait everything gets extracted to start insert
 
         //string[] directories = Directory.GetDirectories(_sourceDirectory);
         //        foreach (string directory in directories)
         //        {
         //            Console.WriteLine($"{directory}");
         //        }
-
-    // to do - remove folder after extract files
-    // to do - maybe insert the data after extracting and delete the folder,
-    // because the CSV file has a strange name with weird formatting,
-    // and that will give me unnecessary work later
-}
+    }
 }
