@@ -7,6 +7,7 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddSingleton(new HttpClient());
         services.AddSingleton<DataScraperService>();
         services.AddSingleton<ZipService>();
+        services.AddSingleton<CsvProcessor>();
         services.AddHostedService<Worker>(); 
     })
     .Build();

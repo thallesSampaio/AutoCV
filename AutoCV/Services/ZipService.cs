@@ -39,10 +39,5 @@ namespace AutoCV.Services
 
         //to do - in future, after a csv get extracted start to insert when exctracting the other, no wait everything gets extracted to start insert
 
-        //string[] directories = Directory.GetDirectories(_sourceDirectory);
-        //        foreach (string directory in directories)
-        //        {
-        //            Console.WriteLine($"{directory}");
-        //        }
     }
 }

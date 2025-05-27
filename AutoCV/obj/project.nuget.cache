@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "LZBh2tJFneA=",
+  "dgSpecHash": "aeS0giXq9w4=",
   "success": true,
   "projectFilePath": "G:\\dev\\AutoCV\\AutoCV\\AutoCV.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\Thall\\.nuget\\packages\\csvhelper\\33.0.1\\csvhelper.33.0.1.nupkg.sha512",
     "C:\\Users\\Thall\\.nuget\\packages\\htmlagilitypack\\1.12.1\\htmlagilitypack.1.12.1.nupkg.sha512",
     "C:\\Users\\Thall\\.nuget\\packages\\microsoft.extensions.configuration\\8.0.0\\microsoft.extensions.configuration.8.0.0.nupkg.sha512",
     "C:\\Users\\Thall\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\8.0.0\\microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",
