@@ -1,7 +1,4 @@
-using System.Diagnostics;
-using System.Net;
 using AutoCV.Services;
-using HtmlAgilityPack;
 
 namespace AutoCV
 {
@@ -9,10 +6,12 @@ namespace AutoCV
     {
         private readonly ILogger<Worker> _logger;
         private readonly DataScraperService _scraper;
-        public Worker(ILogger<Worker> logger, DataScraperService scraper)
+        private readonly ZipService _zipService;
+        public Worker(ILogger<Worker> logger, DataScraperService scraper, ZipService zipService)
         {
             _logger = logger;
             _scraper = scraper;
+            _zipService = zipService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -24,6 +23,7 @@ namespace AutoCV
                     _logger.LogInformation("Worker rodando às: {time}", DateTimeOffset.Now);
 
                         await _scraper.DownloadFilesAsync(stoppingToken);
+                        await _zipService.ProcessZipFilesAsync(stoppingToken);
                 }
 
                 await Task.Delay(2000, stoppingToken);
