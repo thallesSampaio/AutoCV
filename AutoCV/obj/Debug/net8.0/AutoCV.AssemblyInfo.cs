@@ -11,10 +11,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("dotnet-AutoCV-5ee38c58-e292-4166-a7d9-1350a4d4a784")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("AutoCV")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+04cde917bd60e5a7f9216822c3f68c0759db7de7")]
 [assembly: System.Reflection.AssemblyProductAttribute("AutoCV")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AutoCV")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
