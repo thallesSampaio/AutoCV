@@ -2,7 +2,6 @@
 using System.Data.SqlClient;
 using AutoCV.Data;
 using AutoCV.Entities;
-using Dapper;
 
 namespace AutoCV.Repositories
 {

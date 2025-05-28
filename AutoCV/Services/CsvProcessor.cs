@@ -5,6 +5,7 @@ using AutoCV.Repositories;
 using AutoCV.Utils;
 using CsvHelper;
 using CsvHelper.Configuration;
+using CsvHelper.Expressions;
 
 namespace AutoCV.Services
 {
@@ -75,6 +76,7 @@ namespace AutoCV.Services
                         _logger.LogError(ex, "Error processing file: {FileName}", csv);
                     }
                 }
+                Directory.Delete(directory, true);
             }
 
             stopwatchTotal.Stop();
@@ -102,8 +104,34 @@ namespace AutoCV.Services
             using var csv = new CsvReader(reader, CsvConfig.config);
             csv.Context.RegisterClassMap<TMap>();
 
+            var cnaesTecnologia = new HashSet<string>
+            {
+                "6201501", // Desenvolvimento sob encomenda
+                "6201502", // Web design
+                "6202300", // Software customizável
+                "6203100", // Software não customizável
+                "6204000", // Consultoria em TI
+                "6209100", // Suporte técnico em TI
+                "6311900", // Hospedagem de sites
+                "6319400", // Portais e conteúdo
+                "8599603", // Treinamento em informática
+                "6201599"
+            };
             foreach (var record in csv.GetRecords<T>())
             {
+                if (record is Empresa empresa)
+                {
+                    var cnaePrincipal = empresa.CnaePrincipal?.Trim();
+
+                    var cnaesSecundarios = empresa.CnaesSecundarios?
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                    var temCnaeTecnologia = cnaesTecnologia.Contains(cnaePrincipal)
+                        || (cnaesSecundarios != null && cnaesSecundarios.Any(c => cnaesTecnologia.Contains(c)));
+
+                    if (!temCnaeTecnologia)
+                        continue; // pula se não for de tecnologia
+                }
                 batch.Add(record);
                 if (batch.Count >= batchSize)
                 {
