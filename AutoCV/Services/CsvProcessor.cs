@@ -1,9 +1,10 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using AutoCV.Entities;
+using AutoCV.Repositories;
 using AutoCV.Utils;
 using CsvHelper;
 using CsvHelper.Configuration;
-using static System.Console;
 
 namespace AutoCV.Services
 {
@@ -11,87 +12,135 @@ namespace AutoCV.Services
     {
         private readonly string _sourceDirectory;
         private readonly ILogger<CsvProcessor> _logger;
+        private readonly GenericRepository _repository;
 
-        public CsvProcessor(IConfiguration configuration, ILogger<CsvProcessor> logger)
+        public CsvProcessor(IConfiguration configuration, GenericRepository genericRepository, ILogger<CsvProcessor> logger)
         {
             _sourceDirectory = configuration["Scraper:DownloadPath"]
                 ?? throw new ArgumentNullException("DownloadPath not found.");
             _logger = logger;
+            _repository = genericRepository;
         }
 
         public void ProcessCsv()
         {
+            var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount / 2 };
+            int totalEmpresas = 0;
+            int totalCnaes = 0;
+            var stopwatchTotal = Stopwatch.StartNew();
+
+            _logger.LogInformation("Starting processing CSV files in directory: {Directory}", _sourceDirectory);
+
             string[] directories = Directory.GetDirectories(_sourceDirectory);
             foreach (string directory in directories)
             {
-                string[] csvFile = Directory.GetFiles(directory);
+                string[] csvFiles = Directory.GetFiles(directory);
 
-                foreach (var csvv in csvFile)
+                foreach (var csv in csvFiles)
                 {
-                    //ProcessFile<Cnae, CnaeMap>(csvv);
-                    ProcessFile<Empresa, EmpresaMap>(csvv);
-                    Console.WriteLine(csvv);
-                    Console.WriteLine($"{directory}");
+                    try
+                    {
+                        var stopwatchFile = Stopwatch.StartNew();
+                        string type = Path.GetExtension(csv);
+                        int processedCount = 0;
+
+                        if (type == ".ESTABELE")
+                        {
+                            processedCount = ProcessFileStreaming<Empresa, EmpresaMap>(csv, "empresas_teste", 10000);
+                            totalEmpresas += processedCount;
+                        }
+                        else if (type == ".CNAECSV")
+                        {
+                            processedCount = ProcessFileStreaming<Cnae, CnaeMap>(csv, "cnae_teste", 10000);
+                            totalCnaes += processedCount;
+                        }
+
+                        stopwatchFile.Stop();
+
+                        _logger.LogInformation("""
+                            File processed: {FileName}
+                            Directory: {Directory}
+                            Records processed: {TotalProcessed}
+                            Processing time: {ElapsedTime}s
+                            Type: {FileType}
+                            """,
+                            Path.GetFileName(csv),
+                            directory,
+                            processedCount,
+                            stopwatchFile.Elapsed.TotalSeconds,
+                            type);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error processing file: {FileName}", csv);
+                    }
                 }
-
-
             }
+
+            stopwatchTotal.Stop();
+
+            _logger.LogInformation("""
+                FINAL RESUME:
+                Total number of empresas processed: {TotalEmpresas}
+                Total number of CNAEs processed: {TotalCnaes}
+                Total execution time: {TotalTime}s
+                Average: {AverageRecords} records/second
+                """,
+                totalEmpresas,
+                totalCnaes,
+                stopwatchTotal.Elapsed.TotalSeconds,
+                (totalEmpresas + totalCnaes) / stopwatchTotal.Elapsed.TotalSeconds);
         }
 
-        private void ProcessFile<TEntity, TMap>(string filePath) where TEntity : class where TMap : ClassMap<TEntity>
+        private int ProcessFileStreaming<T, TMap>(string filePath, string tableName, int batchSize)
+            where T : class where TMap : ClassMap<T>
         {
-            try
-            {
-                var entities = ParseToEntities<TEntity, TMap>(filePath);
+            int totalProcessed = 0;
+            var batch = new List<T>(batchSize);
 
-                foreach (var entity in entities)
-                {
-                    if (entity is Cnae cnae)
-                    {
-                        Console.WriteLine($"Código: {cnae.Codigo} | Descrição: {cnae.Descricao}");
-                    }
-                    else if (entity is Empresa empresa)
-                    {
-                        Console.WriteLine($"CNPJ: {empresa.Cnpj} | Nome: {empresa.Nome} | Email: {empresa.Email} UF: {empresa.Uf} " +
-                            $"CNAE 1: {empresa.CnaePrincipal} cnae2: {empresa.CnaesSecundarios}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro ao processar {filePath}: {ex.Message}");
-            }
-
-            // await _repository.InsertDataAsync(entities);
-        }
-
-        //public List<T> ParseToEntities<T, TMap>(string filePathCsv) where TMap : ClassMap<T> where T : class
-        //{
-        //    using var reader = new StreamReader(filePathCsv, Encoding.UTF8);
-        //    using var csv = new CsvReader(reader, CsvConfig.config);
-
-        //    csv.Context.RegisterClassMap<TMap>();
-        //    var csvDataList = csv.GetRecords<T>().ToList();
-        //    return csvDataList;
-        //}
-
-        public List<T> ParseToEntities<T, TMap>(string filePathCsv)
-    where TMap : ClassMap<T>
-    where T : class
-        {
-            var list = new List<T>();
-
-            using var reader = new StreamReader(filePathCsv, Encoding.UTF8);
+            using var reader = new StreamReader(filePath, Encoding.UTF8);
             using var csv = new CsvReader(reader, CsvConfig.config);
-
             csv.Context.RegisterClassMap<TMap>();
 
-            foreach (var record in csv.GetRecords<T>().Take(1000000))
+            foreach (var record in csv.GetRecords<T>())
             {
-                list.Add(record);
+                batch.Add(record);
+                if (batch.Count >= batchSize)
+                {
+                    try
+                    {
+                        _repository.BulkInsert(tableName, batch);
+                        totalProcessed += batch.Count;
+
+                        _logger.LogDebug("Inserted batch of {BatchSize} records into table {TableName}. Total: {TotalProcessed}",
+                            batch.Count, tableName, totalProcessed);
+
+                        batch.Clear();
+
+                        if (totalProcessed % 100_000 == 0)
+                        {
+                            _logger.LogInformation("Progress marker: {TotalProcessed} records processed", totalProcessed);
+                            GC.Collect();
+                            GC.WaitForPendingFinalizers();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error inserting batch into table {TableName}", tableName);
+                        throw;
+                    }
+                }
             }
 
-            return list;
+            // Processar último lote
+            if (batch.Count > 0)
+            {
+                _repository.BulkInsert(tableName, batch);
+                totalProcessed += batch.Count;
+                _logger.LogDebug("Last batch with {BatchSize} records inserted", batch.Count);
+            }
+
+            return totalProcessed;
         }
     }
-} 
+}

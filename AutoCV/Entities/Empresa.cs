@@ -21,7 +21,7 @@
         public string Telefone { get; set; }
         public string Email { get; set; }
 
-        public bool StatusEnvio { get; set; }
+        //public bool StatusEnvio { get; set; }
         // public DateTime? DataEnvioEmail { get; set; } // Pode ser nulo caso ainda não tenha enviado
     }
 }

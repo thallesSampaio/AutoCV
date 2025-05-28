@@ -54,6 +54,10 @@
               "target": "Package",
               "version": "[33.0.1, )"
             },
+            "Dapper": {
+              "target": "Package",
+              "version": "[2.1.66, )"
+            },
             "HtmlAgilityPack": {
               "target": "Package",
               "version": "[1.12.1, )"
@@ -61,6 +65,10 @@
             "Microsoft.Extensions.Hosting": {
               "target": "Package",
               "version": "[8.0.1, )"
+            },
+            "System.Data.SqlClient": {
+              "target": "Package",
+              "version": "[4.9.0, )"
             }
           },
           "imports": [
